@@ -1,0 +1,76 @@
+.data
+prompt: .asciiz "Enter a number (N >= 25): "
+error_msg: .asciiz "Illegal Number!\n"
+
+    .text
+    .globl main
+
+main:
+   
+    li $v0, 4
+    la $a0, prompt
+    syscall
+
+    li $v0, 5
+    syscall
+    move $t0, $v0 # Store N in $t0
+
+check_legal_number:
+    
+    blez $t0, illegal_number
+    li $t1, 25
+    blt $t0, $t1, illegal_number
+
+    # N is legal, proceed to Fibonacci sequence
+    j fibonacci
+
+illegal_number:
+
+    li $v0, 4
+    la $a0, error_msg
+    syscall
+
+    li $v0, 4
+    la $a0, prompt
+    syscall
+
+    li $v0, 5
+    syscall
+    move $t0, $v0 # Store new N in $t0
+
+    j check_legal_number
+
+fibonacci:
+    
+    li $t1, 0  # First Fibonacci number
+    li $t2, 1  # Second Fibonacci number
+
+    li $v0, 1
+    move $a0, $t1
+    syscall
+
+    li $v0, 1
+    move $a0, $t2
+    syscall
+
+    # Loop to calculate and print the rest of the sequence
+    sub $t0, $t0, 2 # Adjust N for the first two numbers
+fibonacci_loop:
+    bnez $t0, fibonacci_next
+
+
+    li $v0, 10
+    syscall
+
+fibonacci_next:
+    add $t3, $t1, $t2  # Calculate next Fibonacci number
+    li $v0, 1
+    move $a0, $t3
+    syscall
+
+    # Update $t1 and $t2 for the next iteration
+    move $t1, $t2
+    move $t2, $t3
+
+    sub $t0, $t0, 1
+    j fibonacci_loop
